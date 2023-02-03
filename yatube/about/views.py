@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView
 
 
@@ -36,7 +35,6 @@ class AboutTechView(TemplateView):
                            '<ul>CSS</ul>'
                            '<ul>HTML</ul>'
                            '<ul>JS</ul>'
-             
                            '<ul>Bootstrap</ul>')
         context['text_2'] = ('Благодаря этому спринту я нашел свои '
                              'пробелы в знаниях, например я даже не знал '
