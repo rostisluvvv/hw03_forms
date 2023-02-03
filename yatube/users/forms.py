@@ -16,5 +16,3 @@ class PasswordChangeForm(forms.Form):
     new_password = forms.CharField(label='Введите новый пароль')
     repeat_new_password = forms.CharField(
         label='Введите новый пароль(повторно)')
-
-

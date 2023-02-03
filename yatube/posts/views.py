@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
 from .models import Post, Group, User
 from .forms import PostForm
+
 
 COUNT_POSTS: int = 10
 
@@ -52,7 +52,6 @@ def profile(request, username):
     return render(request, 'posts/profile.html', context)
 
 
-
 def post_detail(request, post_id):
     posts_detail = get_object_or_404(Post, pk=post_id)
     context = {'posts_detail': posts_detail}
@@ -88,6 +87,3 @@ def post_edit(request, post_id):
     }
     template_name = 'posts/create_post.html'
     return render(request, template_name, context)
-
-
-

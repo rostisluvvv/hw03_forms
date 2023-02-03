@@ -45,5 +45,4 @@ class AboutTechView(TemplateView):
                              'самостоятельно и выполняя этот спринт '
                              'закрепил знания')
 
-
         return context
