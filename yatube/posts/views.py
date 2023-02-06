@@ -59,24 +59,23 @@ def post_detail(request, post_id):
     return render(request, 'posts/post_detail.html', context)
 
 
+@login_required
 def post_create(request):
-    form = PostForm(request.POST)
+    form = PostForm(request.POST or None)
     template_name = 'posts/create_post.html'
     context = {'form': form}
-    if request.user.is_authenticated:
-        if form.is_valid():
-            form.instance.author = request.user
-            form.save()
-            return redirect('posts:profile', request.user)
 
-        return render(request, template_name, context)
-    return redirect('users:login')
+    if form.is_valid():
+        form.instance.author = request.user
+        form.save()
+        return redirect('posts:profile', request.user)
+    return render(request, template_name, context)
 
 
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    form = PostForm(request.POST, instance=post)
+    form = PostForm(request.POST or None, instance=post)
 
     if form.is_valid():
         form.save()
