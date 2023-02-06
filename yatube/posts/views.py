@@ -12,8 +12,7 @@ COUNT_POSTS: int = 10
 def pagination(request, post_list, count_post):
     paginator = Paginator(post_list, count_post)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return page_obj
+    return paginator.get_page(page_number)
 
 
 def index(request):
@@ -76,16 +75,16 @@ def post_create(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     form = PostForm(request.POST or None, instance=post)
-
     if request.user != post.author:
         return redirect('posts:post_detail', post.id)
-
     if form.is_valid():
         form.save()
+    is_edit = PostForm(instance=post)
 
     context = {
         'form': form,
         'post': post,
+        'is_edit': is_edit,
     }
     template_name = 'posts/create_post.html'
     return render(request, template_name, context)

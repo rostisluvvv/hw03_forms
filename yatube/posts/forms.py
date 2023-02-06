@@ -9,7 +9,7 @@ class PostForm(ModelForm):
         model = Post
         fields = ('text', 'group')
         labels = {
-            'text': _('Text'),
+            'text': _('Text of post'),
             'group': _('Group'),
         }
         help_texts = {
