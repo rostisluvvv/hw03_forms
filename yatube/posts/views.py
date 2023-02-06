@@ -9,6 +9,12 @@ from .forms import PostForm
 COUNT_POSTS: int = 10
 
 
+def pagination(request, post_list, count_post=COUNT_POSTS):
+    paginator = Paginator(post_list, count_post)
+    page_number = request.GET.get('page')
+    return paginator.get_page(page_number)
+
+
 def index(request):
     post_list = Post.objects.all()
     paginator = Paginator(post_list, COUNT_POSTS)
