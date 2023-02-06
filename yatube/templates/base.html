@@ -27,18 +27,13 @@
 <body>
 {% include 'includes/header.html' %}
 
-
-
-
-
+<main>
 <div class="container py-5">
-  <main>
+  {% block content %}
+  {% endblock %}
+</div>
+</main>
 
-    {% block content %}
-
-    {% endblock %}
-
-  </main>
-  {% include 'includes/footer.html' %}
+{% include 'includes/footer.html' %}
 </body>
 </html>

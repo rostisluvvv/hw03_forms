@@ -80,7 +80,6 @@ def post_edit(request, post_id):
     if form.is_valid():
         form.save()
     is_edit = PostForm(instance=post)
-
     context = {
         'form': form,
         'post': post,

@@ -29,15 +29,14 @@
              {% else %}
              {% url 'posts:post_create'%} {% endif %}">
               {% csrf_token %}
+
               <div class="form-group row my-3 p-3">
                 <label for="id_text">
-                  Текст поста
-                  {% for field in form %}
-
-                  {% endfor %}
-
+                  Текст
 
                   <span class="required text-danger">*</span>
+
+
                 </label>
                 <textarea name="text" cols="40" rows="10" class="form-control"
                           required id="id_text">
@@ -50,6 +49,7 @@
                   {% endif %}
                 </small>
               </div>
+
               <div class="form-group row my-3 p-3">
                 <label for="id_group">
                   Группа
