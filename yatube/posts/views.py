@@ -9,15 +9,15 @@ from .forms import PostForm
 COUNT_POSTS: int = 10
 
 
-def pagination(request, post_list, count_post):
-    paginator = Paginator(post_list, count_post)
+def pagination(request, post_list):
+    paginator = Paginator(post_list, COUNT_POSTS)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
 
 
 def index(request):
     post_list = Post.objects.all()
-    page_obj = pagination(request, post_list, COUNT_POSTS)
+    page_obj = pagination(request, post_list)
 
     context = {
         'page_obj': page_obj,
@@ -29,7 +29,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
 
     post_list = group.posts.all()
-    page_obj = pagination(request, post_list, COUNT_POSTS)
+    page_obj = pagination(request, post_list)
     context = {
         'group': group,
         'page_obj': page_obj,
@@ -39,9 +39,9 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    count_posts = author.posts.all().count()
     post_list = author.posts.all()
-    page_obj = pagination(request, post_list, COUNT_POSTS)
+    count_posts = post_list.count()
+    page_obj = pagination(request, post_list)
     context = {
         'username': username,
         'author': author,
@@ -80,11 +80,11 @@ def post_edit(request, post_id):
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post.id)
-    is_edit = PostForm(instance=post)
+
     context = {
         'form': form,
         'post': post,
-        'is_edit': is_edit,
+        'is_edit': True,
     }
     template_name = 'posts/create_post.html'
     return render(request, template_name, context)
