@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.db.models import get_app, get_models
 from django.test import TestCase
 
 from ..models import Post, Group
@@ -29,4 +28,16 @@ class PostModelTest(TestCase):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         group = PostModelTest.group
-        self.assertEqual(str(group.title), group.title)
+        post = PostModelTest.post
+
+        str_tests = {
+            str(group.title): group.title,
+            str(post.text): post.text
+        }
+
+        for model_field, expected_value in str_tests.items():
+            with self.subTest(model_field=model_field):
+                self.assertEqual(
+                    model_field, expected_value
+                )
+
