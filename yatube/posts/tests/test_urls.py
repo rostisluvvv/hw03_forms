@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from http import HTTPStatus
 
-from ..models import Post
+from ..models import Post, Group
 
 
 User = get_user_model()
@@ -13,34 +14,53 @@ class PostsURLTests(TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
-        Post.objects.create(
-            author=cls.user,
-            text='Тестовый пост'
-        )
+
 
     def setUp(self):
         self.guest_client = Client()
-        self.user = User.objects.create_user(username='HasNoName')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test_group',
+            description='Тестовое описание'
+        )
+        self.post = Post.objects.create(
+            author=self.user,
+            text='Тестовое описание поста')
 
-    def test__urls_uses_correct_template(self):
-        templates_url_names = {
-            'http://127.0.0.1:8000/': '/',
-            'http://127.0.0.1:8000/group/<slug>/': '/group/<slug>/',
-            'http://127.0.0.1:8000/profile/<username>/': '/profile<username>',
-            'http://127.0.0.1:8000/posts/<post_id>/': '/posts/<post_id>/',
-            'http://127.0.0.1:8000/posts/<post_id>/edit/': '/posts/<post_id>/edit/',
-            'http://127.0.0.1:8000/create/': '/create/',
+    def test_urls_uses_correct_template(self):
+        templates_url_names: dict = {
+            'posts/index.html': '/',
+            'posts/group_list.html': f'/group/{self.group.slug}/',
+            'posts/profile.html': f'/profile/{self.user.username}/',
+            'posts/post_detail.html': f'/posts/{self.post.id}/',
+            'posts/create_post.html': f'/posts/{self.post.id}/edit/',
+            'posts/create_post.html': '/create/',
         }
-        for page, address in templates_url_names.items():
+
+        for template, address in templates_url_names.items():
             with self.subTest(address=address):
-                if '/create/' in page:
+                response = self.authorized_client.get(address)
+                self.assertTemplateUsed(response, template)
+
+    def test_urls(self):
+        url_names: tuple = (
+            '/',
+            f'/group/{self.group.slug}/',
+            f'/profile/{self.user.username}/',
+            f'/posts/{self.post.id}/',
+            f'/posts/{self.post.id}/edit/',
+            '/create/'
+        )
+        for address in url_names:
+            with self.subTest(address=address):
+                if 'edit' or 'create' in address:
                     response = self.authorized_client.get(address)
                 else:
                     response = self.guest_client.get(address)
-                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
-
-
-
+    def test_unexisting_page(self):
+        response = self.guest_client.get('/unexisting_page/')
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
