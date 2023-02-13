@@ -60,6 +60,19 @@ class PostsURLTests(TestCase):
                     response = self.guest_client.get(address)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
+    def test_redirect_guest_client(self):
+        redirect_create_url = '/auth/login/?next=/create/'
+        redirect_edit_url = f'/auth/login/?next=/posts/{self.post.id}/edit/'
+
+        pages: dict = {
+            '/create/': redirect_create_url,
+            f'/posts/{self.post.id}/edit/': redirect_edit_url
+        }
+
+        for page, redirect_page in pages.items():
+            response = self.guest_client.get(page)
+            self.assertRedirects(response, redirect_page)
+
     def test_unexisting_page(self):
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
