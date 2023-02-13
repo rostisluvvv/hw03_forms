@@ -15,7 +15,6 @@ class PostsURLTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
 
-
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
