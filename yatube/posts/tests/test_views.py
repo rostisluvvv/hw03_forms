@@ -101,7 +101,24 @@ class PostPagesTest(TestCase):
         self.assertEqual(
             response.context.get('page_obj')[0].group, self.group)
 
-    # def test_profile_context(self):
+    def test_profile_context(self):
+        response = self.client.get(
+            reverse('posts:profile', kwargs={'username': self.user.username}))
+        self.assertEqual(
+            response.context.get('page_obj')[0].author, self.user)
+
+    def test_post_detail(self):
+        response = self.client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post.pk}))
+        self.assertEqual(
+            response.context.get('posts_detail').id, self.post.pk
+        )
+
+    def test_post_create(self):
+
+
+
+
 
 TEST_OF_POST: int = 13
 COUNT_POST_FIRST_PAGE: int = 10
