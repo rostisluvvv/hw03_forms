@@ -18,15 +18,17 @@ class PostPagesTest(TestCase):
         self.user = User.objects.create_user(username='NoName')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание'
+        )
         self.post = Post.objects.create(
             author=self.user,
             text='Тестовое описание поста',
+            group=self.group
             )
-        self.group = Group.objects.create(
-            title='Тестовая группа',
-            slug='test_slug',
-            description='Тестовое описание'
-        )
+
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -87,9 +89,19 @@ class PostPagesTest(TestCase):
                          self.user)
 
     def test_group_posts_context(self):
-        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': self.group.slug}))
-        self.assertEqual(response.context.get('group')[0].title, 'Тестовая группа')
+        response = self.client.get(
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}))
+        first_object = response.context['group']
+        group_title_0 = first_object.title
+        group_slug_0 = first_object.slug
+        group_description_0 = first_object.description
+        self.assertEqual(group_title_0, 'Тестовая группа')
+        self.assertEqual(group_slug_0, 'test-slug')
+        self.assertEqual(group_description_0, 'Тестовое описание')
+        self.assertEqual(
+            response.context.get('page_obj')[0].group, self.group)
 
+    # def test_profile_context(self):
 
 TEST_OF_POST: int = 13
 COUNT_POST_FIRST_PAGE: int = 10
@@ -124,11 +136,28 @@ class PaginatorViewTest(TestCase):
                          COUNT_POST_SECOND_PAGE)
 
     def test_group_first_page_contains_ten_records_group(self):
-        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': self.group.slug}))
+        response = self.authorized_client.get(
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         self.assertEqual(len(response.context['page_obj']),
                          COUNT_POST_FIRST_PAGE)
 
     def test_group_second_page_contains_three_records(self):
-        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': self.group.slug}) + '?page=2')
+        response = self.authorized_client.get(
+            reverse('posts:group_list',
+                    kwargs={'slug': self.group.slug}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']),
+                         COUNT_POST_SECOND_PAGE)
+
+    def test_profile_page_contains_ten_records_group(self):
+        response = self.authorized_client.get(
+            reverse('posts:profile',
+                    kwargs={'username': self.user.username}))
+        self.assertEqual(len(response.context['page_obj']),
+                         COUNT_POST_FIRST_PAGE)
+
+    def test_profile_page_contains_three_records(self):
+        response = self.authorized_client.get(reverse(
+            'posts:profile',
+            kwargs={'username': self.user.username}) + '?page=2')
         self.assertEqual(len(response.context['page_obj']),
                          COUNT_POST_SECOND_PAGE)
