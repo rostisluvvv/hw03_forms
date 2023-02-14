@@ -113,15 +113,22 @@ class PaginatorViewTest(TestCase):
                                    author=self.user))
         Post.objects.bulk_create(blank_post)
 
-    def test_first_page_contains_ten_records(self):
+    def test_index_first_page_contains_ten_records(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(len(response.context['page_obj']),
                          COUNT_POST_FIRST_PAGE)
 
-    def test_second_page_contains_three_records(self):
+    def test_index_second_page_contains_three_records(self):
         response = self.client.get(reverse('posts:index') + '?page=2')
         self.assertEqual(len(response.context['page_obj']),
                          COUNT_POST_SECOND_PAGE)
 
+    def test_group_first_page_contains_ten_records_group(self):
+        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': self.group.slug}))
+        self.assertEqual(len(response.context['page_obj']),
+                         COUNT_POST_FIRST_PAGE)
 
-
+    def test_group_second_page_contains_three_records(self):
+        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': self.group.slug}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']),
+                         COUNT_POST_SECOND_PAGE)
