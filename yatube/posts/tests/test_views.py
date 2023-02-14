@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django import forms
 
 from ..models import Post, Group
 
@@ -115,9 +116,29 @@ class PostPagesTest(TestCase):
         )
 
     def test_post_create(self):
+        response = self.authorized_client.get(reverse('posts:post_create'))
+        form_fields: dict = {
+            'text': forms.fields.CharField,
+            'group': forms.fields.ChoiceField
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                self.assertIsInstance(form_field, expected)
 
+    def test_post_edit(self):
+        response = self.client.get(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}))
 
-
+        form_fields: dict = {
+            'text': forms.fields.CharField,
+            'group': forms.fields.ChoiceField
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                print(response.context.get('form').fields.get(value))
+                self.assertIsInstance(form_field, expected)
 
 
 TEST_OF_POST: int = 13
