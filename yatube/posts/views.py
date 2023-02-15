@@ -4,13 +4,11 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Post, Group, User
 from .forms import PostForm
-
-
-COUNT_POSTS: int = 10
+from django.conf import settings
 
 
 def pagination(request, post_list):
-    paginator = Paginator(post_list, COUNT_POSTS)
+    paginator = Paginator(post_list, settings.COUNT_POSTS)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
 
@@ -66,6 +64,7 @@ def post_create(request):
 
     if form.is_valid():
         form.instance.author = request.user
+        print(form.instance)
         form.save()
         return redirect('posts:profile', request.user)
     return render(request, template_name, context)

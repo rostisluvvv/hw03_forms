@@ -2,8 +2,10 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
+from django.conf import settings
 
 from ..models import Post, Group
+from ..forms import PostForm
 
 
 User = get_user_model()
@@ -114,7 +116,7 @@ class PostPagesTest(TestCase):
             response.context.get('posts_detail').id, self.post.pk
         )
 
-    def test_post_create_form(self):
+    def test_post_create_or_edit_form(self):
         response = self.authorized_client.get(reverse('posts:post_create'))
         form_fields: dict = {
             'text': forms.fields.CharField,
@@ -123,24 +125,24 @@ class PostPagesTest(TestCase):
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
+                print(form_field, expected)
                 self.assertIsInstance(form_field, expected)
 
-    # def test_post_edit_form(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:post_edit', kwargs={'post_id': self.post.pk}))
-    #     form_fields = ['group', 'text']
-    #
-    #     for value in form_fields:
-    #         with self.subTest(value=value):
-    #             form_field = response.context.get('form')
-    #             print(form_field)
-    #             print(value)
-    #             self.assertIsInstance(form_field, value)
+    def test_post_edit_form(self):
+        response = self.authorized_client.get(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}))
+        form = response.context['form'].instance
+        self.assertEqual(form, self.post)
+
+    def test_post_form(self):
+        response = self.authorized_client.get(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}))
+        form = response.context['form']
+        self.assertIsInstance(form, PostForm)
 
 
 TEST_OF_POST: int = 13
-COUNT_POST_FIRST_PAGE: int = 10
-COUNT_POST_SECOND_PAGE: int = TEST_OF_POST - COUNT_POST_FIRST_PAGE
+COUNT_POST_SECOND_PAGE: int = TEST_OF_POST - settings.COUNT_POSTS
 
 
 class PaginatorViewTest(TestCase):
@@ -163,7 +165,7 @@ class PaginatorViewTest(TestCase):
     def test_index_first_page_contains_ten_records(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(len(response.context['page_obj']),
-                         COUNT_POST_FIRST_PAGE)
+                         settings.COUNT_POSTS)
 
     def test_index_second_page_contains_three_records(self):
         response = self.client.get(reverse('posts:index') + '?page=2')
@@ -174,7 +176,7 @@ class PaginatorViewTest(TestCase):
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         self.assertEqual(len(response.context['page_obj']),
-                         COUNT_POST_FIRST_PAGE)
+                         settings.COUNT_POSTS)
 
     def test_group_second_page_contains_three_records(self):
         response = self.authorized_client.get(
@@ -188,7 +190,7 @@ class PaginatorViewTest(TestCase):
             reverse('posts:profile',
                     kwargs={'username': self.user.username}))
         self.assertEqual(len(response.context['page_obj']),
-                         COUNT_POST_FIRST_PAGE)
+                         settings.COUNT_POSTS)
 
     def test_profile_page_contains_three_records(self):
         response = self.authorized_client.get(reverse(
