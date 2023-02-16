@@ -3,10 +3,8 @@ from django.test import Client, TestCase
 from ..models import Post, Group
 from django.urls import reverse
 
-from http import HTTPStatus
 
 User = get_user_model()
-
 
 
 class PostCreateFormTests(TestCase):
@@ -33,19 +31,15 @@ class PostCreateFormTests(TestCase):
 
     def test_create_post(self):
         count_post = Post.objects.count()
-        print(count_post)
         form_data = {
             'text': 'Тестовое описание поста',
-            'group': self.post.group.pk,
-
+            'group': self.post.group.pk
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'), data=form_data)
-        print(response)
 
         self.assertRedirects(response, reverse(
             'posts:profile', kwargs={'username': self.user.username}))
-        print(Post.objects.count())
 
         self.assertEqual(Post.objects.count(), count_post + 1)
 
@@ -56,5 +50,23 @@ class PostCreateFormTests(TestCase):
                 group=self.post.group.pk
             )
         )
+
+    def test_post_edit(self):
+        old_text = self.post
+        editable_fields = {
+            'text': 'редактированный текст поста',
+            'group': self.post.group.pk
+        }
+        response = self.authorized_client.post(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}),
+            data=editable_fields)
+        new_text = editable_fields['text']
+
+        self.assertRedirects(
+            response, reverse(
+                'posts:post_detail', kwargs={'post_id': self.post.pk}))
+
+        self.assertNotEqual(old_text, new_text)
+
 
 
